@@ -1,0 +1,26 @@
+{
+    "packageName": "Somfy MyLink",
+    "minimumHEVersion": "2.2.4",
+    "author": "Roman Shtylman",
+    "version": "1.0.0",
+    "dateReleased": "2021-01-26",
+    "licenseFile": "",
+    "releaseNotes": "",
+    "apps" : [],
+    "drivers" : [
+      {
+        "id" : "6f6fa85b-ddfc-4b62-81ae-8661b1ced5a6",
+        "name": "Somfy MyLink Hub",
+        "namespace": "defunctzombie.somfy.mylink",
+        "location": "https://raw.githubusercontent.com/defunctzombie/hubitat-somfy-mylink/v1.0.0/drivers/SomfyMyLinkHub.groovy",
+        "required": true
+      },
+      {
+        "id" : "7d542b4a-fb13-4e29-8032-c7f488b442ff",
+        "name": "Somfy MyLink Shade",
+        "namespace": "defunctzombie.somfy.mylink",
+        "location": "https://raw.githubusercontent.com/defunctzombie/hubitat-somfy-mylink/v1.0.0/drivers/SomfyMyLinkShade.groovy",
+        "required": true
+      }
+    ]
+  }
