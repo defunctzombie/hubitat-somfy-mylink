@@ -74,7 +74,7 @@ metadata {
     }
 
     tiles(scale:2) {
-		standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width:2, height:2) {
+        standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width:2, height:2) {
             state "default", action:"refresh.refresh", icon:"st.secondary.refresh"
         }
     }
@@ -105,7 +105,7 @@ synchronized def sendCommand(String commandMethod, String deviceID){
 }
 
 def createChildDevices() {
-	    log.debug("createChildDevices")
+        log.debug("createChildDevices")
         def devices = [:]
         devices[settings.device1ID] = settings.device1Name
         devices[settings.device2ID] = settings.device2Name
@@ -124,7 +124,7 @@ def createChildDevices() {
         devices[settings.device15ID] = settings.device15Name
         devices[settings.device16ID] = settings.device16Name
         devices.remove(null)
-	    log.debug(devices)
+        log.debug(devices)
         devices.each {deviceID, deviceName ->
             def deviceExists
             if (deviceID) {
@@ -157,7 +157,7 @@ def childStop(String deviceID) {
 }
 
 def installed() {
-	log.debug("Installed")
+    log.debug("Installed")
 }
 
 def updated() {

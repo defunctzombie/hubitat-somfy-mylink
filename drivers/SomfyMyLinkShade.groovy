@@ -55,16 +55,16 @@ metadata {
             state "close", label:'close', icon:"st.doors.garage.garage-closed", backgroundColor:"#00A0DC", action:"close"
             state "closing", label:'closing', icon:"st.doors.garage.garage-closing", backgroundColor:"#00A0DC", action:"stop"
         }
-		standardTile("shadePreset", "device.refresh", width:2, height:2) {
+        standardTile("shadePreset", "device.refresh", width:2, height:2) {
             state "default", label:'preset', icon:"st.Health & Wellness.health9", backgroundColor:"#FFFFFF", action:"presetPosition"
         }
-		standardTile("shadeStop", "device.refresh", width:2, height:2) {
+        standardTile("shadeStop", "device.refresh", width:2, height:2) {
             state "default", label:'stop', icon:"st.Electronics.electronics13", backgroundColor:"#FFFFFF", action:"stop"
         }
         controlTile("levelSlider", "device.level", "slider", height: 2, width: 2) {
             state "level", action:"setLevel"
         }
-		standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width:2, height:2) {
+        standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width:2, height:2) {
             state "default", action:"refresh.refresh", icon:"st.secondary.refresh"
         }
     }
@@ -87,13 +87,13 @@ private timeToLevel(targetLevel){
 }
 
 def updateState(data){
-	log.debug("updateState")
-	log.debug(data)
+    log.debug("updateState")
+    log.debug(data)
     sendEvent(name: data.name, value: data.value)
 }
 
 def installed() {
-	log.debug("Installed")
+    log.debug("Installed")
 }
 
 def poll() {
@@ -174,13 +174,13 @@ def getTimeToOpen(){
 def levelOpenClose(level) {
     log.debug("levelOpenClose (${level})")
     if (value) {   
-	    setLevel(level)
+        setLevel(level)
     }
 }
 
 def setLevel() {
     log.debug("SetLevel()")
-	setLevel(0)
+    setLevel(0)
 }
 
 // 0 = closed
