@@ -18,16 +18,8 @@
 metadata {
     definition (name: "Somfy MyLink Shade", namespace: "defunctzombie.somfy.mylink", author: "") {
         capability "Window Shade"
-        capability "Switch"
-        capability "Switch Level"
-        capability "Actuator"
-        capability "Sensor"
-        capability "Refresh"
-        capability "Polling"
 
         command "stop"
-        command "levelOpenClose"
-        command "presetPosition"
     }
 
     simulator {
@@ -61,8 +53,8 @@ metadata {
         standardTile("shadeStop", "device.refresh", width:2, height:2) {
             state "default", label:'stop', icon:"st.Electronics.electronics13", backgroundColor:"#FFFFFF", action:"stop"
         }
-        controlTile("levelSlider", "device.level", "slider", height: 2, width: 2) {
-            state "level", action:"setLevel"
+        controlTile("positionSlider", "device.position", "slider", height: 2, width: 2) {
+            state "position", action:"setPosition"
         }
         standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width:2, height:2) {
             state "default", action:"refresh.refresh", icon:"st.secondary.refresh"
@@ -77,8 +69,8 @@ metadata {
     }
 }
 
-private timeToLevel(targetLevel){
-    def currLevel = device.currentState("level")?.value.toFloat()
+private timeToLevel(targetLevel) {
+    def currLevel = getPosition()
     def timeToOpen = getTimeToOpen()
     def percTime = timeToOpen / 100
     def levelDiff = Math.abs(currLevel - targetLevel)
@@ -86,7 +78,7 @@ private timeToLevel(targetLevel){
     return moveTime
 }
 
-def updateState(data){
+def updateState(data) {
     log.debug("updateState")
     log.debug(data)
     sendEvent(name: data.name, value: data.value)
@@ -104,37 +96,25 @@ def refresh() {
     log.debug("Refreshing")
 }
 
-def on(){
-    log.debug("On")
-    open()
-}
-
-def off(){
-    log.debug("Off")
-    close()
-}
-
 def open() {
     log.debug("Open")
-    
+
     def targetLevel = 100
     def moveTimeMillis = Math.round(timeToLevel(targetLevel) * 1000)
     sendEvent(name: "windowShade", value: "opening")
-    sendEvent(name: "switch", value: "on")
-    sendEvent(name: "level", value: targetLevel)
+    sendEvent(name: "position", value: targetLevel)
     runInMillis(moveTimeMillis, updateState, [overwrite: false, data: [name: "windowShade", value: "open"]])
-    
+
     triggerOpen()
 }
 
 def close() {
     log.debug("Close")
-    
+
     def targetLevel = 0
     def moveTimeMillis = Math.round(timeToLevel(targetLevel) * 1000)
     sendEvent(name: "windowShade", value: "closing")
-    sendEvent(name: "switch", value: "off")
-    sendEvent(name: "level", value: 0)
+    sendEvent(name: "position", value: 0)
     runInMillis(moveTimeMillis, updateState, [overwrite: false, data: [name: "windowShade", value: "closed"]])
     
     triggerClose()
@@ -142,17 +122,10 @@ def close() {
 
 def presetPosition() {
     log.debug("PresetPosition")
-    def shadeState = device.currentState("windowShade")?.value
-    log.debug(shadeState)
-    if (!shadeState.equalsIgnoreCase("opening") && !shadeState.equalsIgnoreCase("closing")){
-        parent.childStop(device.deviceNetworkId)
-        sendEvent(name: "windowShade", value: "partially open")
-    } else {
-        log.debug("Blind moving. Preset Position ignored.")
-    }
+    stop()
 }
 
-def stop(){
+def stop() {
     log.debug("Stop")
     def shadeState = device.currentState("windowShade")?.value
     log.debug(shadeState)
@@ -164,31 +137,28 @@ def stop(){
     }
 }
 
-def getTimeToOpen(){
+def getPosition() {
+    def currentPosition = device.currentState("position")
+    if (currentPosition == null) {
+        return 0
+    }
+
+    return currentPosition.value.toFloat()
+}
+
+def getTimeToOpen() {
     if (settings.timeToOpen == null){
         return 25
     }
     return settings.timeToOpen.toFloat().toInteger()
 }
 
-def levelOpenClose(level) {
-    log.debug("levelOpenClose (${level})")
-    if (value) {   
-        setLevel(level)
-    }
-}
-
-def setLevel() {
-    log.debug("SetLevel()")
-    setLevel(0)
-}
-
 // 0 = closed
 // 100 = open
-def setLevel(targetLevel) {
+def setPosition(targetLevel) {
     log.debug("Set Level (${targetLevel})")
-    
-    def currLevel = device.currentState("level")?.value.toInteger()
+
+    def currLevel = getPosition()
     log.debug("Current Level (${currLevel})")
 
     if (targetLevel < 10){
@@ -199,13 +169,13 @@ def setLevel(targetLevel) {
         open()
     } else {
         def moveTime = timeToLevel(targetLevel)
-        
+
         // avoid short moves since commands can't be sent this fast
         if (moveTime < 1) {
             log.debug("Move time too short")
             return
         }
-        
+
         Long moveTimeMillis = Math.round(moveTime * 1000)
         log.debug("Scheduling move for: ${moveTime}")
         
@@ -216,14 +186,13 @@ def setLevel(targetLevel) {
         } else {
             triggerClose()
         }
-        
+
         def commandDelay = now() - beforeCommandStamp
         def runInDelay = Math.max(0, moveTimeMillis - commandDelay)
         runInMillis(runInDelay, stop)
 
         sendEvent(name: "windowShade", value: "opening")
-        sendEvent(name: "switch", value: "on")
-        sendEvent(name: "level", value: targetLevel, unit: "%")
+        sendEvent(name: "position", value: targetLevel, unit: "%")
         runInMillis(runInDelay, updateState, [overwrite: false, data: [name: "windowShade", value: "partially open"]])
     }
 }
@@ -242,9 +211,4 @@ def triggerClose() {
     } else {
         parent.childDown(device.deviceNetworkId)
     }
-}
-
-def setLevel(level, rate) {
-    log.debug("Set Level (${level}, ${rate})")
-	setLevel(level)
 }
